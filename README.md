@@ -4,11 +4,11 @@
 
 This playbook will build an HA Kubernetes cluster with `k3s`, `kube-vip` and MetalLB via `ansible`.
 
-This is based on the work from [this fork](https://github.com/212850a/k3s-ansible) which is based on the work from [k3s-io/k3s-ansible](https://github.com/k3s-io/k3s-ansible). It uses [kube-vip](https://kube-vip.chipzoller.dev/) to create a load balancer for control plane, and [metal-lb](https://metallb.universe.tf/installation/) for its service `LoadBalancer`.
+This is based on the work from [this fork](https://github.com/212850a/k3s-ansible) which is based on the work from [k3s-io/k3s-ansible](https://github.com/k3s-io/k3s-ansible). It uses [kube-vip](https://kube-vip.io/) to create a load balancer for control plane, and [metal-lb](https://metallb.universe.tf/installation/) for its service `LoadBalancer`.
 
 If you want more context on how this works, see:
 
-📄 [Documentation](https://docs.technotim.live/posts/k3s-etcd-ansible/) (including example commands)
+📄 [Documentation](https://technotim.live/posts/k3s-etcd-ansible/) (including example commands)
 
 📺 [Watch the Video](https://www.youtube.com/watch?v=CbkEWcUZ7zM)
 
@@ -28,7 +28,7 @@ on processor architecture:
 
 ## ✅ System requirements
 
-- Control Node (the machine you are running `ansible` commands) must have Ansible 2.11+ If you need a quick primer on Ansible [you can check out my docs and setting up Ansible](https://docs.technotim.live/posts/ansible-automation/).
+- Control Node (the machine you are running `ansible` commands) must have Ansible 2.11+ If you need a quick primer on Ansible [you can check out my docs and setting up Ansible](https://technotim.live/posts/ansible-automation/).
 
 - You will also need to install collections that this playbook uses by running `ansible-galaxy collection install -r ./collections/requirements.yml` (important❗)
 
@@ -96,12 +96,26 @@ ansible-playbook reset.yml -i inventory/my-cluster/hosts.ini
 To copy your `kube config` locally so that you can access your **Kubernetes** cluster run:
 
 ```bash
-scp debian@master_ip:~/.kube/config ~/.kube/config
+scp debian@master_ip:/etc/rancher/k3s/k3s.yaml ~/.kube/config
 ```
+If you get file Permission denied, go into the node and temporarly run:
+```bash
+sudo chmod 777 /etc/rancher/k3s/k3s.yaml
+```
+Then copy with the scp command and reset the permissions back to:
+```bash
+sudo chmod 600 /etc/rancher/k3s/k3s.yaml
+```
+
+You'll then want to modify the config to point to master IP by running:
+```bash
+sudo nano ~/.kube/config
+```
+Then change `server: https://127.0.0.1:6443` to match your master IP: `server: https://192.168.1.222:6443`
 
 ### 🔨 Testing your cluster
 
-See the commands [here](https://docs.technotim.live/posts/k3s-etcd-ansible/#testing-your-cluster).
+See the commands [here](https://technotim.live/posts/k3s-etcd-ansible/#testing-your-cluster).
 
 ### Troubleshooting
 
@@ -117,6 +131,28 @@ You can find more information about it [here](molecule/README.md).
 ### Pre-commit Hooks
 
 This repo uses `pre-commit` and `pre-commit-hooks` to lint and fix common style and syntax errors.  Be sure to install python packages and then run `pre-commit install`.  For more information, see [pre-commit](https://pre-commit.com/)
+
+## 🌌 Ansible Galaxy
+
+This collection can now be used in larger ansible projects.
+
+Instructions:
+
+- create or modify a file `collections/requirements.yml` in your project
+
+```yml
+collections:
+  - name: ansible.utils
+  - name: community.general
+  - name: ansible.posix
+  - name: kubernetes.core
+  - name: https://github.com/techno-tim/k3s-ansible.git
+    type: git
+    version: master
+```
+
+- install via `ansible-galaxy collection install -r ./collections/requirements.yml`
+- every role is now available via the prefix `techno_tim.k3s_ansible.` e.g. `techno_tim.k3s_ansible.lxc`
 
 ## Thanks 🤝
 
