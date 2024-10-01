@@ -21,7 +21,7 @@ jobs:
 
     steps:
       - name: Check out the codebase
-        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # 4.1.4
+        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # 4.2.0
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 
@@ -59,13 +59,13 @@ jobs:
           EOF
 
       - name: Set up Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d # 5.1.0
+        uses: actions/setup-python@f677139bbe7f9c59b41e40162b753c062f5d49a3 # 5.2.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip' # caching pip dependencies
 
       - name: Restore vagrant Boxes cache
-        uses: actions/cache/restore@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # 4.0
+        uses: actions/cache/restore@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # 4.0.2
         with:
           path: ~/.vagrant.d/boxes
           key: vagrant-boxes-${{ hashFiles('**/molecule.yml') }}
@@ -118,7 +118,7 @@ jobs:
 
       - name: Upload log files
         if: always() # do this even if a step before has failed
-        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # 4.3.3
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # 4.4.0
         with:
           name: logs
           path: |
